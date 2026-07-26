@@ -167,6 +167,43 @@ export async function generateResult(
     throw new Error("RESULT_VERIFICATION_FAILED");
   }
 
+  const expires = new Date(Date.now() + 86400000).toISOString();
+  const values = {
+    theme_id: room?.theme_id,
+    storage_path: path,
+    thumbnail_path: thumbPath,
+    width,
+    height,
+    mime_type: "image/jpeg",
+    size_bytes: output.byteLength,
+    expires_at: expires
+  };
+  const resultQuery = existing
+    ? admin
+        .from("photobox_results")
+        .update(values)
+        .eq("id", existing.id)
+    : admin.from("photobox_results").insert({
+        id,
+        session_id: sessionId,
+        ...values
+      });
+  const { data: result, error } = await resultQuery.select("*").single();
+  if (error) {
+    const { data: concurrent } = await admin
+      .from("photobox_results")
+      .select("*")
+      .eq("session_id", sessionId)
+      .maybeSingle();
+    const pathsBelongToConcurrent =
+      concurrent?.storage_path === path ||
+      concurrent?.thumbnail_path === thumbPath;
+    if (!pathsBelongToConcurrent)
+      await resultStorage.remove([path, thumbPath]);
+    if (concurrent) return concurrent;
+    throw error;
+  }
+
   if (existing) {
     const supersededPaths = [
       existing.storage_path,
@@ -176,36 +213,6 @@ export async function generateResult(
         Boolean(oldPath) && oldPath !== path && oldPath !== thumbPath
     );
     if (supersededPaths.length) await resultStorage.remove(supersededPaths);
-    const { error: deleteError } = await admin
-      .from("photobox_results")
-      .delete()
-      .eq("id", existing.id);
-    if (deleteError) {
-      await resultStorage.remove([path, thumbPath]);
-      throw deleteError;
-    }
-  }
-
-  const expires = new Date(Date.now() + 86400000).toISOString();
-  const { data: result, error } = await admin
-    .from("photobox_results")
-    .insert({
-      id,
-      session_id: sessionId,
-      theme_id: room?.theme_id,
-      storage_path: path,
-      thumbnail_path: thumbPath,
-      width,
-      height,
-      mime_type: "image/jpeg",
-      size_bytes: output.byteLength,
-      expires_at: expires
-    })
-    .select("*")
-    .single();
-  if (error) {
-    await resultStorage.remove([path, thumbPath]);
-    throw error;
   }
 
   await admin
