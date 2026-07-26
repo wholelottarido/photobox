@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "validate:cloud": "node scripts/validate-cloud.mjs"
+    "validate:cloud": "node scripts/validate-cloud.mjs",
+    "smoke:production": "node scripts/smoke-production.mjs"
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.23",

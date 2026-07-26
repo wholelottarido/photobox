@@ -4,7 +4,7 @@ Deployment memerlukan kredensial Supabase, LiveKit, GitHub, dan Vercel milik And
 
 ## Urutan deployment
 
-1. Terapkan migration `0001`–`0004` dan `seed.sql` ke Supabase.
+1. Terapkan migration `0001`–`0005` dan `seed.sql` ke Supabase.
 2. Aktifkan Anonymous Sign-Ins dan periksa lima tema aktif.
 3. Buat project LiveKit Cloud dan simpan URL serta API credentials.
 4. Push repository ke GitHub.

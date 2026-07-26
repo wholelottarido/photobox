@@ -94,7 +94,8 @@ Aktifkan **Anonymous Sign-Ins**, kemudian jalankan secara berurutan:
 2. `supabase/migrations/0002_rls_policies.sql`
 3. `supabase/migrations/0003_storage_and_realtime.sql`
 4. `supabase/migrations/0004_cleanup_jobs.sql`
-5. `supabase/seed.sql`
+5. `supabase/migrations/0005_fix_auth_profile_trigger.sql`
+6. `supabase/seed.sql`
 
 Melalui CLI:
 
@@ -123,10 +124,12 @@ npm run test
 npm run build
 npm run test:e2e
 npm run validate:cloud
+npm run smoke:production
 ```
 
 E2E dua peserta memerlukan Supabase, LiveKit, HTTPS, dan browser fake-media atau dua perangkat nyata.
 `validate:cloud` memeriksa schema, bucket, endpoint Auth, dan LiveKit API tanpa mencetak credential.
+`smoke:production` membuat room sementara pada domain production, menguji host/guest dan LiveKit, lalu menghapus room uji.
 
 ## Deployment
 
