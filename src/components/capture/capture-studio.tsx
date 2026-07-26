@@ -94,7 +94,10 @@ export function CaptureStudio({ code, sessionId }: { code: string; sessionId: st
               clientCapturedAt: new Date().toISOString()
             })
           });
-          if (!confirm.ok) throw new Error("Konfirmasi foto gagal.");
+          if (!confirm.ok) {
+            const confirmBody = await confirm.json().catch(() => null);
+            throw new Error(confirmBody?.error?.message || "Konfirmasi foto gagal.");
+          }
           await wait(650);
         }
 
