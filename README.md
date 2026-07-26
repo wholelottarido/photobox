@@ -122,9 +122,11 @@ npm run typecheck
 npm run test
 npm run build
 npm run test:e2e
+npm run validate:cloud
 ```
 
 E2E dua peserta memerlukan Supabase, LiveKit, HTTPS, dan browser fake-media atau dua perangkat nyata.
+`validate:cloud` memeriksa schema, bucket, endpoint Auth, dan LiveKit API tanpa mencetak credential.
 
 ## Deployment
 

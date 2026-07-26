@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "validate:cloud": "node scripts/validate-cloud.mjs"
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.23",
