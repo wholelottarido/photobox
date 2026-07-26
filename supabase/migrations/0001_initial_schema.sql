@@ -61,7 +61,7 @@ create table public.photo_shots (
 create table public.photobox_results (
  id uuid primary key default gen_random_uuid(), session_id uuid unique not null references public.photo_sessions(id) on delete cascade,
  theme_id uuid references public.photobox_themes(id), storage_path text not null, thumbnail_path text, width integer not null check(width>0), height integer not null check(height>0),
- mime_type varchar(50) not null default 'image/webp', size_bytes bigint, expires_at timestamptz not null,
+ mime_type varchar(50) not null default 'image/jpeg', size_bytes bigint, expires_at timestamptz not null,
  created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 create table public.audit_events (
