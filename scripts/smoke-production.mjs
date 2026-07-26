@@ -73,6 +73,47 @@ try {
   console.log("GUEST_INVITATION=OK");
   console.log("GUEST_LIVEKIT=OK");
   console.log("REALTIME_PARTICIPANTS=OK");
+
+  await guest.getByRole("button", { name: "Saya siap" }).click();
+  await host.getByRole("button", { name: "Saya siap" }).click();
+  const startButton = host.getByRole("button", { name: "Mulai Photobox" });
+  await startButton.waitFor();
+  await startButton.isEnabled({ timeout: 30_000 });
+  await startButton.click();
+
+  await Promise.all([
+    host.waitForURL(/\/result\/[^/]+$/, { timeout: 90_000 }),
+    guest.waitForURL(/\/result\/[^/]+$/, { timeout: 90_000 })
+  ]);
+  const preview = host.getByAltText("Strip photobox hasil sesi");
+  await preview.waitFor({ state: "visible", timeout: 30_000 });
+  await preview.evaluate((image) => {
+    if (image.complete && image.naturalWidth > 0) return;
+    return new Promise((resolve, reject) => {
+      image.addEventListener("load", () => resolve(undefined), { once: true });
+      image.addEventListener("error", () => reject(new Error("JPEG preview failed")), { once: true });
+    });
+  });
+
+  const resultId = new URL(host.url()).pathname.split("/").pop();
+  const downloadResponse = await hostContext.request.post(
+    `${baseUrl}/api/results/${resultId}/download-url`
+  );
+  if (!downloadResponse.ok())
+    throw new Error(`JPEG download URL failed: ${downloadResponse.status()}`);
+  const downloadBody = await downloadResponse.json();
+  const jpegResponse = await hostContext.request.get(downloadBody.data.url);
+  const jpeg = await jpegResponse.body();
+  if (
+    !jpegResponse.ok() ||
+    !jpegResponse.headers()["content-type"]?.startsWith("image/jpeg") ||
+    jpeg[0] !== 0xff ||
+    jpeg[1] !== 0xd8
+  ) {
+    throw new Error("Downloaded result is not a valid JPEG");
+  }
+  console.log("JPEG_PREVIEW=OK");
+  console.log("JPEG_DOWNLOAD=OK");
   console.log("PRODUCTION_SMOKE_TEST=OK");
 } catch (error) {
   console.error("PRODUCTION_SMOKE_TEST=FAIL");

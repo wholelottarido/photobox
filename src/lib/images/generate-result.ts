@@ -23,6 +23,26 @@ function exactArrayBuffer(buffer: Buffer): ArrayBuffer {
   ) as ArrayBuffer;
 }
 
+async function uploadJpeg(
+  path: string,
+  buffer: Buffer
+): Promise<void> {
+  const storage = createAdminClient().storage.from("photobox-results");
+  const { data, error } = await storage.createSignedUploadUrl(path, {
+    upsert: true
+  });
+  if (error || !data?.signedUrl)
+    throw new Error(`RESULT_UPLOAD_URL_FAILED: ${error?.message || path}`);
+
+  const response = await fetch(data.signedUrl, {
+    method: "PUT",
+    headers: { "content-type": "image/jpeg" },
+    body: new Blob([exactArrayBuffer(buffer)], { type: "image/jpeg" })
+  });
+  if (!response.ok)
+    throw new Error(`RESULT_UPLOAD_FAILED: HTTP ${response.status}`);
+}
+
 export async function generateResult(
   sessionId: string,
   options: GenerateOptions = {}
@@ -128,21 +148,12 @@ export async function generateResult(
   const thumbPath = `${session.room_id}/${sessionId}/${id}-thumb.jpg`;
   const resultStorage = admin.storage.from("photobox-results");
 
-  const { error: outputError } = await resultStorage.upload(
-    path,
-    exactArrayBuffer(output),
-    { contentType: "image/jpeg", upsert: true }
-  );
-  if (outputError) throw new Error(`RESULT_UPLOAD_FAILED: ${outputError.message}`);
-
-  const { error: thumbError } = await resultStorage.upload(
-    thumbPath,
-    exactArrayBuffer(thumb),
-    { contentType: "image/jpeg", upsert: true }
-  );
-  if (thumbError) {
+  try {
+    await uploadJpeg(path, output);
+    await uploadJpeg(thumbPath, thumb);
+  } catch (error) {
     await resultStorage.remove([path]);
-    throw new Error(`THUMBNAIL_UPLOAD_FAILED: ${thumbError.message}`);
+    throw error;
   }
 
   const { data: verification, error: verificationError } =
