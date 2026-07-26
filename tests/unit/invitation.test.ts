@@ -1,0 +1,2 @@
+import {describe,expect,it} from "vitest";import {createInvitationToken,hashInvitationToken} from "@/lib/invitations/crypto";
+describe("invitation crypto",()=>{it("creates opaque tokens and deterministic peppered hashes",()=>{const token=createInvitationToken(),pepper="x".repeat(32);expect(token.length).toBeGreaterThan(40);expect(hashInvitationToken(token,pepper)).toMatch(/^[a-f0-9]{64}$/);expect(hashInvitationToken(token,pepper)).toBe(hashInvitationToken(token,pepper));expect(hashInvitationToken(token,"y".repeat(32))).not.toBe(hashInvitationToken(token,pepper))})});

@@ -1,0 +1,5 @@
+"use client";
+import {useCallback,useEffect,useRef,useState} from "react";
+export function useCameraCapture(){const videoRef=useRef<HTMLVideoElement>(null),[error,setError]=useState("");
+ useEffect(()=>{let stream:MediaStream|undefined;navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:960}},audio:false}).then(s=>{stream=s;if(videoRef.current){videoRef.current.srcObject=s;void videoRef.current.play()}}).catch(()=>setError("CAMERA_PERMISSION_DENIED"));return()=>stream?.getTracks().forEach(t=>t.stop())},[]);
+ const capture=useCallback(async()=>{const v=videoRef.current;if(!v||!v.videoWidth)throw new Error("CAMERA_NOT_READY");const max=1600,scale=Math.min(1,max/v.videoWidth),c=document.createElement("canvas");c.width=Math.round(v.videoWidth*scale);c.height=Math.round(v.videoHeight*scale);c.getContext("2d")!.drawImage(v,0,0,c.width,c.height);const blob=await new Promise<Blob>((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error("CAPTURE_FAILED")),"image/webp",.9));return{blob,width:c.width,height:c.height}},[]);return{videoRef,capture,error};}

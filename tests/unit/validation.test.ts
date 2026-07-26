@@ -1,0 +1,2 @@
+import {describe,expect,it} from "vitest";import {createRoomSchema} from "@/lib/validation/schemas";
+describe("room validation",()=>{it("trims names and accepts valid settings",()=>{expect(createRoomSchema.parse({displayName:"  Rani ",themeSlug:"pink-love",totalShots:4,countdownSeconds:3,invitationMessage:"Hai",expiresHours:24}).displayName).toBe("Rani")});it("rejects unsafe ranges",()=>{expect(createRoomSchema.safeParse({displayName:"A",totalShots:9,countdownSeconds:0}).success).toBe(false)})});
