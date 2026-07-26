@@ -2,7 +2,13 @@ import type { NextConfig } from "next";
 
 const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const livekit = process.env.NEXT_PUBLIC_LIVEKIT_URL;
-const connect = ["'self'", "https://*.supabase.co", "wss://*.supabase.co", "wss://*.livekit.cloud"];
+const connect = [
+  "'self'",
+  "https://*.supabase.co",
+  "wss://*.supabase.co",
+  "https://*.livekit.cloud",
+  "wss://*.livekit.cloud"
+];
 if (supabase) connect.push(supabase.replace("https://", "wss://"), supabase);
 if (livekit) connect.push(livekit);
 
